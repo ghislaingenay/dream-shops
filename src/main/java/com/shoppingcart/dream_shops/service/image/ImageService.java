@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.shoppingcart.dream_shops.dto.ImageDto;
-import com.shoppingcart.dream_shops.exception.NotFoundResource;
+import com.shoppingcart.dream_shops.http_exception.NotFoundHttpException;
 import com.shoppingcart.dream_shops.model.Image;
 import com.shoppingcart.dream_shops.model.Product;
 import com.shoppingcart.dream_shops.repository.ImageRepository;
@@ -29,7 +29,7 @@ public class ImageService implements IImageService {
   @Override
   public Image getImageById(Long id) {
     return imageRepository.findById(id)
-        .orElseThrow(() -> new NotFoundResource("Image not found"));
+        .orElseThrow(() -> new NotFoundHttpException("Image not found"));
   }
 
   @Override
@@ -80,7 +80,7 @@ public class ImageService implements IImageService {
   @Override
   public void deleteImageById(Long id) {
     imageRepository.findById(id).ifPresentOrElse(imageRepository::delete, () -> {
-      throw new NotFoundResource("Image not found");
+      throw new NotFoundHttpException("Image not found");
     });
   }
 }

@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.shoppingcart.dream_shops.exception.NotFoundResource;
+import com.shoppingcart.dream_shops.http_exception.NotFoundHttpException;
 import com.shoppingcart.dream_shops.model.Category;
 import com.shoppingcart.dream_shops.model.Product;
 import com.shoppingcart.dream_shops.repository.CategoryRepository;
@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class ProductService implements IProductService {
+  private static final String PRODUCT_NOT_FOUND_MSG = "Product not found";
   private final CategoryRepository categoryRepository; // use final and RequiredArgsConstructor to inject
   // categoryService
   private final ProductRepository productRepository; // use final and RequiredArgsConstructor to inject
@@ -47,13 +48,13 @@ public class ProductService implements IProductService {
 
   @Override
   public Product getProductById(Long productId) {
-    return productRepository.findById(productId).orElseThrow(() -> new NotFoundResource());
+    return productRepository.findById(productId).orElseThrow(() -> new NotFoundHttpException(PRODUCT_NOT_FOUND_MSG));
   }
 
   @Override
   public Product updateProduct(Long productId, ProductUpdateRequest request) {
     return productRepository.findById(productId).map(existingProduct -> updateExistingProduct(existingProduct, request))
-        .map(productRepository::save).orElseThrow(() -> new NotFoundResource());
+        .map(productRepository::save).orElseThrow(() -> new NotFoundHttpException(PRODUCT_NOT_FOUND_MSG));
   }
 
   private Product updateExistingProduct(Product existingProduct, ProductUpdateRequest request) {
@@ -71,7 +72,7 @@ public class ProductService implements IProductService {
   @Override
   public void deleteProductById(Long productId) {
     productRepository.findById(productId).ifPresentOrElse(productRepository::delete, () -> {
-      throw new NotFoundResource();
+      throw new NotFoundHttpException(PRODUCT_NOT_FOUND_MSG);
     });
   }
 

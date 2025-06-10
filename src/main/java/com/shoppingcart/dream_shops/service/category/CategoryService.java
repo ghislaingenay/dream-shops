@@ -5,8 +5,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.shoppingcart.dream_shops.exception.AlreadyExistsException;
-import com.shoppingcart.dream_shops.exception.NotFoundResource;
+import com.shoppingcart.dream_shops.http_exception.AlreadyExistsHttpException;
+import com.shoppingcart.dream_shops.http_exception.NotFoundHttpException;
 import com.shoppingcart.dream_shops.model.Category;
 import com.shoppingcart.dream_shops.repository.CategoryRepository;
 
@@ -20,7 +20,7 @@ public class CategoryService implements ICategoryService {
   @Override
   public Category getCategoryById(Long id) {
     return categoryRepository.findById(id)
-        .orElseThrow(() -> new NotFoundResource("Category not found"));
+        .orElseThrow(() -> new NotFoundHttpException("Category not found"));
   }
 
   @Override
@@ -45,7 +45,7 @@ public class CategoryService implements ICategoryService {
     return Optional.of(category).filter(c -> !categoryRepository.existsByName(c.getName()))
         .map(categoryRepository::save)
         .orElseThrow(
-            () -> new AlreadyExistsException(category.getName() + " already exists"));
+            () -> new AlreadyExistsHttpException(category.getName() + " already exists"));
   }
 
   @Override
@@ -54,13 +54,13 @@ public class CategoryService implements ICategoryService {
       existingCategory.setName(category.getName());
       return categoryRepository.save(existingCategory);
     })
-        .orElseThrow(() -> new NotFoundResource("Category not found"));
+        .orElseThrow(() -> new NotFoundHttpException("Category not found"));
   }
 
   @Override
   public void deleteCategory(Long id) {
     categoryRepository.findById(id).ifPresentOrElse(categoryRepository::delete, () -> {
-      throw new NotFoundResource("Category not found");
+      throw new NotFoundHttpException("Category not found");
     });
   }
 
