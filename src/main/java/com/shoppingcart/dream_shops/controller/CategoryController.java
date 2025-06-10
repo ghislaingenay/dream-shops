@@ -53,6 +53,13 @@ public class CategoryController {
     }
   }
 
+  @GetMapping("/{name}/name")
+  public ResponseEntity<ApiResponse> getCategoryById(@PathVariable("name") String name) {
+    Category category = categoryService.getCategoryByName(name);
+    return ResponseEntity.ok(new ApiResponse("Category retrieved", category));
+
+  }
+
   @PostMapping("/create")
   public ResponseEntity<ApiResponse> createCategory(@RequestBody Category category) {
     Category createdCategory = categoryService.createCategory(category);

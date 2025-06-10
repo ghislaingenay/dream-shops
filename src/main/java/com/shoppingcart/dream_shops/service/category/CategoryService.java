@@ -26,7 +26,14 @@ public class CategoryService implements ICategoryService {
 
   @Override
   public Category getCategoryByName(String name) {
-    return categoryRepository.findByName(name);
+    try {
+      return Optional.ofNullable(categoryRepository.findByName(name))
+          .orElseThrow(() -> new NotFoundHttpException("Category not found"));
+    } catch (NotFoundHttpException e) {
+      throw e; // rethrow the exception if it occurs
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to retrieve category: " + e.getMessage());
+    }
   }
 
   @Override
