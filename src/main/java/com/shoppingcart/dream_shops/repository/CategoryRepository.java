@@ -7,5 +7,7 @@ import com.shoppingcart.dream_shops.model.Category;
 public interface CategoryRepository extends JpaRepository<Category, Long> {
   Category findByName(String name);
 
+  Boolean existsByName(String name);
+
   // You can add more custom query methods if needed
 }
