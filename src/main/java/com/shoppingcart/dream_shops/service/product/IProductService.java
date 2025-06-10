@@ -3,13 +3,15 @@ package com.shoppingcart.dream_shops.service.product;
 import java.util.List;
 
 import com.shoppingcart.dream_shops.model.Product;
+import com.shoppingcart.dream_shops.request.AddProductRequest;
+import com.shoppingcart.dream_shops.request.ProductUpdateRequest;
 
 public interface IProductService {
-  Product addProduct(Product product);
+  Product addProduct(AddProductRequest product);
 
   Product getProductById(Long productId);
 
-  Product updateProduct(Long productId, Product product);
+  Product updateProduct(Long productId, ProductUpdateRequest product);
 
   void deleteProductById(Long productId);
 
