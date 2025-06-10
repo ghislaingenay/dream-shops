@@ -1,7 +1,10 @@
 package com.shoppingcart.dream_shops.service.image;
 
+import java.util.List;
+
 import org.springframework.web.multipart.MultipartFile;
 
+import com.shoppingcart.dream_shops.dto.ImageDto;
 import com.shoppingcart.dream_shops.model.Image;
 
 public interface IImageService {
@@ -9,7 +12,7 @@ public interface IImageService {
 
   void deleteImageById(Long id);
 
-  Image saveImage(Long productId, MultipartFile file);
+  List<ImageDto> saveImages(Long productId, List<MultipartFile> files);
 
   void updateImage(Long imageId, MultipartFile file);
 
