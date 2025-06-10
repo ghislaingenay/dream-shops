@@ -1,14 +1,12 @@
 package com.shoppingcart.dream_shops.service.category;
 
-import java.lang.foreign.Linker.Option;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.shoppingcart.dream_shops.exception.AlreadyExistsException;
-import com.shoppingcart.dream_shops.exception.CategoryNotFoundException;
-import com.shoppingcart.dream_shops.exception.NotFoundException;
+import com.shoppingcart.dream_shops.exception.NotFoundResource;
 import com.shoppingcart.dream_shops.model.Category;
 import com.shoppingcart.dream_shops.repository.CategoryRepository;
 
@@ -22,7 +20,7 @@ public class CategoryService implements ICategoryService {
   @Override
   public Category getCategoryById(Long id) {
     return categoryRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Category not found"));
+        .orElseThrow(() -> new NotFoundResource("Category not found"));
   }
 
   @Override
@@ -56,13 +54,13 @@ public class CategoryService implements ICategoryService {
       existingCategory.setName(category.getName());
       return categoryRepository.save(existingCategory);
     })
-        .orElseThrow(() -> new NotFoundException("Category not found"));
+        .orElseThrow(() -> new NotFoundResource("Category not found"));
   }
 
   @Override
   public void deleteCategory(Long id) {
     categoryRepository.findById(id).ifPresentOrElse(categoryRepository::delete, () -> {
-      throw new NotFoundException("Category not found");
+      throw new NotFoundResource("Category not found");
     });
   }
 
