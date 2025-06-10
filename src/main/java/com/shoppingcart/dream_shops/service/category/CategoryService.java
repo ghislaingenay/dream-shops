@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.shoppingcart.dream_shops.exception.AlreadyExistsException;
 import com.shoppingcart.dream_shops.exception.CategoryNotFoundException;
 import com.shoppingcart.dream_shops.exception.NotFoundException;
 import com.shoppingcart.dream_shops.model.Category;
@@ -26,7 +27,7 @@ public class CategoryService implements ICategoryService {
 
   @Override
   public Category getCategoryByName(String name) {
-    return categoryRepository.findByName(name)
+    return categoryRepository.findByName(name);
   }
 
   @Override
@@ -36,14 +37,26 @@ public class CategoryService implements ICategoryService {
 
   @Override
   public Category createCategory(Category category) {
-    // Implementation here
-    return null;
+    // .filter(c -> !categoryRepository.existsByName(c.getName())) keeps the
+    // category only if the condition is true.
+
+    // If existsByName(c.getName()) returns false, the category passes the filter.
+
+    // If a category with the same name exists (true), the filter removes it, and
+    // the result is Optional.empty()
+    return Optional.of(category).filter(c -> !categoryRepository.existsByName(c.getName()))
+        .map(categoryRepository::save)
+        .orElseThrow(
+            () -> new AlreadyExistsException(category.getName() + " already exists"));
   }
 
   @Override
   public Category updateCategory(Long id, Category category) {
-    // Implementation here
-    return null;
+    return Optional.ofNullable(getCategoryById(id)).map(existingCategory -> {
+      existingCategory.setName(category.getName());
+      return categoryRepository.save(existingCategory);
+    })
+        .orElseThrow(() -> new NotFoundException("Category not found"));
   }
 
   @Override
