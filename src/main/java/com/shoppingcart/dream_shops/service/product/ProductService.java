@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.shoppingcart.dream_shops.http_exception.InternalServerHttpException;
 import com.shoppingcart.dream_shops.http_exception.NotFoundHttpException;
 import com.shoppingcart.dream_shops.model.Category;
 import com.shoppingcart.dream_shops.model.Product;
@@ -36,7 +37,11 @@ public class ProductService implements IProductService {
           return categoryRepository.save(newCategory);
         });
     Product product = createProduct(request, category);
-    return productRepository.save(product);
+    try {
+      return productRepository.save(product);
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to add product: " + e.getMessage());
+    }
   }
 
   /** Hypermethod to help create a product to addProduct */
@@ -48,7 +53,13 @@ public class ProductService implements IProductService {
 
   @Override
   public Product getProductById(Long productId) {
-    return productRepository.findById(productId).orElseThrow(() -> new NotFoundHttpException(PRODUCT_NOT_FOUND_MSG));
+    try {
+      return productRepository.findById(productId).orElseThrow(() -> new NotFoundHttpException(PRODUCT_NOT_FOUND_MSG));
+    } catch (NotFoundHttpException e) {
+      throw e; // rethrow the exception if it occurs
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to retrieve product: " + e.getMessage());
+    }
   }
 
   @Override
@@ -71,44 +82,78 @@ public class ProductService implements IProductService {
 
   @Override
   public void deleteProductById(Long productId) {
-    productRepository.findById(productId).ifPresentOrElse(productRepository::delete, () -> {
-      throw new NotFoundHttpException(PRODUCT_NOT_FOUND_MSG);
-    });
+    try {
+      productRepository.findById(productId).ifPresentOrElse(productRepository::delete, () -> {
+        throw new NotFoundHttpException(PRODUCT_NOT_FOUND_MSG);
+      });
+    } catch (NotFoundHttpException e) {
+      throw e; // rethrow the exception if it occurs
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to delete product: " + e.getMessage());
+    }
   }
 
   @Override
   public List<Product> getAllProducts() {
-    return productRepository.findAll();
+    try {
+      return productRepository.findAll();
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to retrieve products: " + e.getMessage());
+    }
   }
 
   @Override
   public List<Product> getProductsByCategory(Long category) {
-    return productRepository.findByCategoryName(category);
+    try {
+      return productRepository.findByCategoryName(category);
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to retrieve products by category: " + e.getMessage());
+    }
   }
 
   @Override
   public List<Product> getProductsByBrand(String brand) {
-    return productRepository.findByBrand(brand);
+    try {
+      return productRepository.findByBrand(brand);
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to retrieve products by brand: " + e.getMessage());
+    }
   }
 
   @Override
   public List<Product> getProductsByCategoryAndBrand(Long category, String brand) {
-    return productRepository.findByCategoryNameAndBrand(category, brand);
+    try {
+      return productRepository.findByCategoryNameAndBrand(category, brand);
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to retrieve products by category and brand: " + e.getMessage());
+    }
   }
 
   @Override
   public List<Product> getProductsByName(String name) {
-    return productRepository.getByName(name);
+    try {
+      return productRepository.getByName(name);
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to retrieve products by name: " + e.getMessage());
+    }
   }
 
   @Override
   public List<Product> getProductsByBrandAndName(String brand, String name) {
-    return productRepository.findByBrandAndName(brand, name);
+    try {
+      return productRepository.findByBrandAndName(brand, name);
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to retrieve products by brand and name: " + e.getMessage());
+    }
   }
 
   @Override
   public Long countProductsByBrandAndName(String brand, String name) {
-    return productRepository.countByBrandAndName(brand, name);
+    try {
+      return productRepository.countByBrandAndName(brand, name);
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to count products by brand and name: " + e.getMessage());
+    }
   }
 
 }
