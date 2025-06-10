@@ -10,7 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,7 +17,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
+// @AllArgsConstructor => remove because we want to use a custom constructor =>
+// Use @AllArgsConstructor only if you really need a constructor with all fields
+// (which is rare for JPA entities).
 @Entity
 public class Product {
   @Id
@@ -34,6 +35,16 @@ public class Product {
   @ManyToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "category_id")
   private Category category; // Category name or ID
+
+  public Product(String name, String brand, BigDecimal price, int inventory, String description,
+      Category category) {
+    this.name = name;
+    this.brand = brand;
+    this.price = price;
+    this.inventory = inventory;
+    this.description = description;
+    this.category = category;
+  }
 
   @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true) // Maps the relationship to the
                                                                                     // Image entity
