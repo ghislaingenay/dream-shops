@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.shoppingcart.dream_shops.http_exception.AlreadyExistsHttpException;
+import com.shoppingcart.dream_shops.http_exception.InternalServerHttpException;
 import com.shoppingcart.dream_shops.http_exception.NotFoundHttpException;
 import com.shoppingcart.dream_shops.model.Category;
 import com.shoppingcart.dream_shops.repository.CategoryRepository;
@@ -42,10 +43,16 @@ public class CategoryService implements ICategoryService {
 
     // If a category with the same name exists (true), the filter removes it, and
     // the result is Optional.empty()
-    return Optional.of(category).filter(c -> !categoryRepository.existsByName(c.getName()))
-        .map(categoryRepository::save)
-        .orElseThrow(
-            () -> new AlreadyExistsHttpException(category.getName() + " already exists"));
+    try {
+      return Optional.of(category).filter(c -> !categoryRepository.existsByName(c.getName()))
+          .map(categoryRepository::save)
+          .orElseThrow(
+              () -> new AlreadyExistsHttpException(category.getName() + " already exists"));
+    } catch (AlreadyExistsHttpException e) {
+      throw e; // rethrow the exception if it occurs
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to create category: " + e.getMessage());
+    }
   }
 
   @Override
@@ -59,9 +66,15 @@ public class CategoryService implements ICategoryService {
 
   @Override
   public void deleteCategory(Long id) {
-    categoryRepository.findById(id).ifPresentOrElse(categoryRepository::delete, () -> {
-      throw new NotFoundHttpException("Category not found");
-    });
+    try {
+      categoryRepository.findById(id).ifPresentOrElse(categoryRepository::delete, () -> {
+        throw new NotFoundHttpException("Category not found");
+      });
+    } catch (NotFoundHttpException e) {
+      throw e; // rethrow the exception if it occurs
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to delete category: " + e.getMessage());
+    }
   }
 
 }
