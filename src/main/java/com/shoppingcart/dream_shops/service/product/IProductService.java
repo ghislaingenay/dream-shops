@@ -30,4 +30,5 @@ public interface IProductService {
   // List<Product> getProductsByCategoryAndName(Long category, String name);
 
   Long countProductsByBrandAndName(String brand, String name);
+
 }
