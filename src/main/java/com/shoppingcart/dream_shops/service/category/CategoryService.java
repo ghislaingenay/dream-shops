@@ -1,14 +1,13 @@
 package com.shoppingcart.dream_shops.service.category;
 
-import java.lang.foreign.Linker.Option;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.shoppingcart.dream_shops.exception.AlreadyExistsException;
-import com.shoppingcart.dream_shops.exception.CategoryNotFoundException;
-import com.shoppingcart.dream_shops.exception.NotFoundException;
+import com.shoppingcart.dream_shops.http_exception.AlreadyExistsHttpException;
+import com.shoppingcart.dream_shops.http_exception.InternalServerHttpException;
+import com.shoppingcart.dream_shops.http_exception.NotFoundHttpException;
 import com.shoppingcart.dream_shops.model.Category;
 import com.shoppingcart.dream_shops.repository.CategoryRepository;
 
@@ -22,12 +21,19 @@ public class CategoryService implements ICategoryService {
   @Override
   public Category getCategoryById(Long id) {
     return categoryRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Category not found"));
+        .orElseThrow(() -> new NotFoundHttpException("Category not found"));
   }
 
   @Override
   public Category getCategoryByName(String name) {
-    return categoryRepository.findByName(name);
+    try {
+      return Optional.ofNullable(categoryRepository.findByName(name))
+          .orElseThrow(() -> new NotFoundHttpException("Category not found"));
+    } catch (NotFoundHttpException e) {
+      throw e; // rethrow the exception if it occurs
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to retrieve category: " + e.getMessage());
+    }
   }
 
   @Override
@@ -44,10 +50,16 @@ public class CategoryService implements ICategoryService {
 
     // If a category with the same name exists (true), the filter removes it, and
     // the result is Optional.empty()
-    return Optional.of(category).filter(c -> !categoryRepository.existsByName(c.getName()))
-        .map(categoryRepository::save)
-        .orElseThrow(
-            () -> new AlreadyExistsException(category.getName() + " already exists"));
+    try {
+      return Optional.of(category).filter(c -> !categoryRepository.existsByName(c.getName()))
+          .map(categoryRepository::save)
+          .orElseThrow(
+              () -> new AlreadyExistsHttpException(category.getName() + " already exists"));
+    } catch (AlreadyExistsHttpException e) {
+      throw e; // rethrow the exception if it occurs
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to create category: " + e.getMessage());
+    }
   }
 
   @Override
@@ -56,14 +68,20 @@ public class CategoryService implements ICategoryService {
       existingCategory.setName(category.getName());
       return categoryRepository.save(existingCategory);
     })
-        .orElseThrow(() -> new NotFoundException("Category not found"));
+        .orElseThrow(() -> new NotFoundHttpException("Category not found"));
   }
 
   @Override
   public void deleteCategory(Long id) {
-    categoryRepository.findById(id).ifPresentOrElse(categoryRepository::delete, () -> {
-      throw new NotFoundException("Category not found");
-    });
+    try {
+      categoryRepository.findById(id).ifPresentOrElse(categoryRepository::delete, () -> {
+        throw new NotFoundHttpException("Category not found");
+      });
+    } catch (NotFoundHttpException e) {
+      throw e; // rethrow the exception if it occurs
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to delete category: " + e.getMessage());
+    }
   }
 
 }

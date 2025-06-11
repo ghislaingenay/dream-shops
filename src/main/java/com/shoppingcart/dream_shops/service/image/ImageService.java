@@ -1,17 +1,15 @@
 package com.shoppingcart.dream_shops.service.image;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.shoppingcart.dream_shops.dto.ImageDto;
-import com.shoppingcart.dream_shops.exception.NotFoundException;
+import com.shoppingcart.dream_shops.http_exception.NotFoundHttpException;
 import com.shoppingcart.dream_shops.model.Image;
 import com.shoppingcart.dream_shops.model.Product;
 import com.shoppingcart.dream_shops.repository.ImageRepository;
@@ -29,7 +27,7 @@ public class ImageService implements IImageService {
   @Override
   public Image getImageById(Long id) {
     return imageRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Image not found"));
+        .orElseThrow(() -> new NotFoundHttpException("Image not found"));
   }
 
   @Override
@@ -52,12 +50,14 @@ public class ImageService implements IImageService {
         savedImage.setDownloadUrl(buildDownloadUrl + savedImage.getId());
         imageRepository.save(savedImage);
 
-        ImageDto imageDto = new ImageDto(savedImage.getId(), savedImage.getFileName(),
-            savedImage.getDownloadUrl());
+        ImageDto imageDto = new ImageDto();
+        imageDto.setImageId(savedImage.getId());
+        imageDto.setImageName(savedImage.getFileName());
+        imageDto.setDownloadUrl(savedImage.getDownloadUrl());
         savedImageDtos.add(imageDto);
 
       } catch (IOException | DataAccessException e) {
-        throw new RuntimeException("Error saving image: " + e.getMessage());
+        throw new RuntimeException(e.getMessage());
       }
     }
     return savedImageDtos;
@@ -80,7 +80,7 @@ public class ImageService implements IImageService {
   @Override
   public void deleteImageById(Long id) {
     imageRepository.findById(id).ifPresentOrElse(imageRepository::delete, () -> {
-      throw new NotFoundException("Image not found");
+      throw new NotFoundHttpException("Image not found");
     });
   }
 }

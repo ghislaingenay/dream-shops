@@ -2,6 +2,8 @@ package com.shoppingcart.dream_shops.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,6 +24,17 @@ public class Category {
   private long id;
   private String name;
 
+  /**
+   * Reqson to use @JSonIgnore
+   * To prevent infinite recursion in bidirectional relationships (like Category ↔
+   * Product).
+   * To avoid sending unnecessary or sensitive data in API responses.
+   * To reduce the size of the JSON response.
+   */
+
+  @JsonIgnore // not to include the annotated field in JSON serialization or deserialization
+  // This means when you return a Category object as JSON (e.g., in a REST API
+  // response), the products list will not be included in the JSON output
   @OneToMany(mappedBy = "category")
   private List<Product> products;
 
