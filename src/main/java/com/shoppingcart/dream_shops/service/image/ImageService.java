@@ -1,10 +1,8 @@
 package com.shoppingcart.dream_shops.service.image;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -52,8 +50,10 @@ public class ImageService implements IImageService {
         savedImage.setDownloadUrl(buildDownloadUrl + savedImage.getId());
         imageRepository.save(savedImage);
 
-        ImageDto imageDto = new ImageDto(savedImage.getId(), savedImage.getFileName(),
-            savedImage.getDownloadUrl());
+        ImageDto imageDto = new ImageDto();
+        imageDto.setImageId(savedImage.getId());
+        imageDto.setImageName(savedImage.getFileName());
+        imageDto.setDownloadUrl(savedImage.getDownloadUrl());
         savedImageDtos.add(imageDto);
 
       } catch (IOException | DataAccessException e) {
