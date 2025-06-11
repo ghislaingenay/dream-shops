@@ -3,13 +3,18 @@ package com.shoppingcart.dream_shops.service.product;
 import java.util.List;
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import com.shoppingcart.dream_shops.dto.ImageDto;
+import com.shoppingcart.dream_shops.dto.ProductDto;
 import com.shoppingcart.dream_shops.http_exception.InternalServerHttpException;
 import com.shoppingcart.dream_shops.http_exception.NotFoundHttpException;
 import com.shoppingcart.dream_shops.model.Category;
+import com.shoppingcart.dream_shops.model.Image;
 import com.shoppingcart.dream_shops.model.Product;
 import com.shoppingcart.dream_shops.repository.CategoryRepository;
+import com.shoppingcart.dream_shops.repository.ImageRepository;
 import com.shoppingcart.dream_shops.repository.ProductRepository;
 import com.shoppingcart.dream_shops.request.AddProductRequest;
 import com.shoppingcart.dream_shops.request.ProductUpdateRequest;
@@ -25,6 +30,9 @@ public class ProductService implements IProductService {
   private final ProductRepository productRepository; // use final and RequiredArgsConstructor to inject
                                                      // productRepository
   // This ensures that productRepository is not null and is properly initialized
+  private final ImageRepository imageRepository; // use final and RequiredArgsConstructor to inject
+
+  private final ModelMapper moddelMapper = new ModelMapper();
 
   @Override
   public Product addProduct(AddProductRequest request) {
@@ -156,4 +164,21 @@ public class ProductService implements IProductService {
     }
   }
 
+  @Override
+  public List<ProductDto> getConvertedProducts(List<Product> products) {
+    return products.stream()
+        .map(this::covertToDto)
+        .toList();
+  }
+
+  @Override
+  public ProductDto covertToDto(Product product) {
+    ProductDto productDto = moddelMapper.map(product, ProductDto.class);
+    List<Image> images = imageRepository.findByProductId(product.getId());
+    List<ImageDto> imageDtos = images.stream()
+        .map(image -> moddelMapper.map(image, ImageDto.class))
+        .toList();
+    productDto.setImages(imageDtos);
+    return productDto;
+  }
 }
