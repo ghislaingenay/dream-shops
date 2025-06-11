@@ -1,7 +1,12 @@
 package com.shoppingcart.dream_shops.service.car_item;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
+import com.shoppingcart.dream_shops.http_exception.InternalServerHttpException;
+import com.shoppingcart.dream_shops.http_exception.NotFoundHttpException;
 import com.shoppingcart.dream_shops.model.Cart;
 import com.shoppingcart.dream_shops.model.CartItem;
 import com.shoppingcart.dream_shops.model.Product;
@@ -43,8 +48,16 @@ public class CarItemService implements ICarItemService {
     }
     cartItem.setTotalPrice();
     cart.addCartItem(cartItem);
-    carItemRepository.save(cartItem);
-    cartRepository.save(cart);
+    try {
+      carItemRepository.save(cartItem);
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to save cart item: " + e.getMessage());
+    }
+    try {
+      cartRepository.save(cart);
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to save cart: " + e.getMessage());
+    }
     // If yes => Increase the quantity
     // else => Add the product to the cart
   }
@@ -52,10 +65,44 @@ public class CarItemService implements ICarItemService {
   @Override
 
   public void removeItemFromCart(Long cartId, Long productId) {
+    Cart cart = cartService.getCartById(cartId);
+    CartItem cartItem = cart.getCartItems().stream()
+        .filter(item -> item.getProduct().getId() == productId).findFirst()
+        .orElseThrow(() -> new NotFoundHttpException("Cart item not found"));
+    cart.removeCartItem(cartItem);
+    cartRepository.save(cart);
+
   }
 
   @Override
   public void updateItemQuantity(Long cartId, Long productId, int quantity) {
+    Cart cart = cartService.getCartById(cartId);
+    CartItem cartItem = cart.getCartItems().stream()
+        .filter(item -> item.getProduct().getId() == productId).findFirst()
+        .orElseThrow(() -> new NotFoundHttpException("Cart item not found"));
+
+    if (quantity <= 0) {
+      removeItemFromCart(cartId, productId);
+      return;
+    }
+    cartItem.setQuantity(quantity);
+    cartItem.setUnitPrice(cartItem.getProduct().getPrice());
+    cartItem.setTotalPrice();
+
+    // This is a defensive check to ensure the cart's total amount is never null.
+    // If, for any reason, getTotalAmount() returns null (maybe the cart is empty or
+    // not recalculated), this sets it to BigDecimal.ZERO to avoid
+    // NullPointerException in later processing or API responses.
+    // It ensures your API always returns a valid number for the cart total.
+    BigDecimal totalAmount = cart.getTotalAmount();
+    cart.setTotalAmount(totalAmount != null ? totalAmount : BigDecimal.ZERO);
+
+    try {
+      carItemRepository.save(cartItem);
+      cartRepository.save(cart);
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to update cart: " + e.getMessage());
+    }
   }
 
 }
