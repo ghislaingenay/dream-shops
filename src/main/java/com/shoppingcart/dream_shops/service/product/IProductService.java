@@ -32,7 +32,7 @@ public interface IProductService {
 
   Long countProductsByBrandAndName(String brand, String name);
 
-  public ProductDto covertToDto(Product product);
+  public ProductDto convertToDto(Product product);
 
   /** Convert list of Product to ProductDto */
   public List<ProductDto> getConvertedProducts(List<Product> products);

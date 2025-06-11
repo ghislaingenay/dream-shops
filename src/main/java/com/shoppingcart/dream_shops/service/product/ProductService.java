@@ -167,12 +167,12 @@ public class ProductService implements IProductService {
   @Override
   public List<ProductDto> getConvertedProducts(List<Product> products) {
     return products.stream()
-        .map(this::covertToDto)
+        .map(this::convertToDto)
         .toList();
   }
 
   @Override
-  public ProductDto covertToDto(Product product) {
+  public ProductDto convertToDto(Product product) {
     ProductDto productDto = moddelMapper.map(product, ProductDto.class);
     List<Image> images = imageRepository.findByProductId(product.getId());
     List<ImageDto> imageDtos = images.stream()
