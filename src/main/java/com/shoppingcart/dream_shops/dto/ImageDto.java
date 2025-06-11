@@ -1,4 +1,10 @@
 package com.shoppingcart.dream_shops.dto;
 
-public record ImageDto(Long imageId, String imageName, String downloadUrl) {
+import lombok.Data;
+
+@Data
+public class ImageDto {
+  private Long imageId;
+  private String imageName;
+  private String downloadUrl;
 }
