@@ -6,4 +6,7 @@ import com.shoppingcart.dream_shops.model.CartItem;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
   void deleteAllByCartId(Long cartId);
+
+  CartItem findByCartIdAndProductId(Long cartId, Long productId);
+
 }
