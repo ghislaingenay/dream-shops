@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.shoppingcart.dream_shops.dto.ProductDto;
 import com.shoppingcart.dream_shops.http_exception.BadRequestHttpException;
 import com.shoppingcart.dream_shops.model.Product;
 import com.shoppingcart.dream_shops.request.AddProductRequest;
@@ -55,7 +56,8 @@ public class ProductController {
       products = productService.getProductsByBrandAndName(brand, name);
     }
     if (products != null && !products.isEmpty()) {
-      return ResponseEntity.ok(new ApiResponse("Products retrieved", products));
+      List<ProductDto> productDtos = productService.getConvertedProducts(products);
+      return ResponseEntity.ok(new ApiResponse("Products retrieved", productDtos));
     }
     throw new BadRequestHttpException(
         "Invalid search parameters. Please provide at least one of: brand, category, or name.");
@@ -64,7 +66,8 @@ public class ProductController {
   @GetMapping("/{id}")
   public ResponseEntity<ApiResponse> getProductById(@PathVariable Long id) {
     Product product = productService.getProductById(id);
-    return ResponseEntity.ok(new ApiResponse("Product retrieved", product));
+    ProductDto productDto = productService.convertToDto(product);
+    return ResponseEntity.ok(new ApiResponse("Product retrieved", productDto));
   }
 
   @PostMapping("/create")
