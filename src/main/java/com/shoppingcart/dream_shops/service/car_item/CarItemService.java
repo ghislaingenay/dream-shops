@@ -66,9 +66,7 @@ public class CarItemService implements ICarItemService {
 
   public void removeItemFromCart(Long cartId, Long productId) {
     Cart cart = cartService.getCartById(cartId);
-    CartItem cartItem = cart.getCartItems().stream()
-        .filter(item -> item.getProduct().getId() == productId).findFirst()
-        .orElseThrow(() -> new NotFoundHttpException("Cart item not found"));
+    CartItem cartItem = getCartItem(cartId, productId);
     cart.removeCartItem(cartItem);
     cartRepository.save(cart);
 
@@ -77,10 +75,7 @@ public class CarItemService implements ICarItemService {
   @Override
   public void updateItemQuantity(Long cartId, Long productId, int quantity) {
     Cart cart = cartService.getCartById(cartId);
-    CartItem cartItem = cart.getCartItems().stream()
-        .filter(item -> item.getProduct().getId() == productId).findFirst()
-        .orElseThrow(() -> new NotFoundHttpException("Cart item not found"));
-
+    CartItem cartItem = getCartItem(cartId, productId);
     if (quantity <= 0) {
       removeItemFromCart(cartId, productId);
       return;
@@ -105,4 +100,12 @@ public class CarItemService implements ICarItemService {
     }
   }
 
+  @Override
+  public CartItem getCartItem(Long cartId, Long productId) {
+    Cart cart = cartService.getCartById(cartId);
+    return cart.getCartItems().stream()
+        .filter(item -> item.getProduct().getId() == productId).findFirst()
+        .orElseThrow(() -> new NotFoundHttpException("Cart item not found"));
+
+  }
 }
