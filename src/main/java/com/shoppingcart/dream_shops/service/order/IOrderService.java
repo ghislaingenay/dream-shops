@@ -1,5 +1,7 @@
 package com.shoppingcart.dream_shops.service.order;
 
+import java.util.List;
+
 import com.shoppingcart.dream_shops.model.Order;
 
 public interface IOrderService {
@@ -7,4 +9,5 @@ public interface IOrderService {
 
   Order getOrder(Long orderId);
 
+  List<Order> getOrdersByUserId(Long userId);
 }

@@ -1,9 +1,10 @@
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.shoppingcart.dream_shops.enums.OrderStatus;
@@ -18,6 +19,7 @@ import com.shoppingcart.dream_shops.repository.ProductRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import com.shoppingcart.dream_shops.service.cart.CartService;
 import com.shoppingcart.dream_shops.service.order.IOrderService;
 
 @Service
@@ -25,15 +27,29 @@ import com.shoppingcart.dream_shops.service.order.IOrderService;
 public class OrderService implements IOrderService {
   private final OrderRepository orderRepository;
   private final ProductRepository productRepository;
+  private final CartService cartService; // Assuming you have a CartService to manage carts
 
   @Override
   public Order placeOrder(Long userId) {
+    Cart cart = cartService.getCartByUserId(userId);
+    Order order = createOrder(cart);
+    List<OrderItem> orderItems = createOrderItems(order, cart);
+    order.setTotalAmount(calculateTotalAmount(orderItems));
+    order.setOrderItems(new HashSet<>(orderItems));
+    Order savedOrder;
+    try {
+      savedOrder = orderRepository.save(order);
+      cartService.clearCart(cart.getId()); // Clear the cart after placing the order
+    } catch (Exception e) {
+      throw new InternalServerHttpException("Failed to place order: " + e.getMessage());
+    }
 
-    return null; // Placeholder return statement
+    return savedOrder;
   }
 
   private Order createOrder(Cart cart) {
     Order order = new Order();
+    order.setUser(cart.getUser());
     order.setOrderStatus(OrderStatus.PEDNING);
     order.setOrderDate(LocalDate.now());
     order.setTotalAmount(BigDecimal.ZERO);
@@ -66,11 +82,19 @@ public class OrderService implements IOrderService {
     try {
       return orderRepository.findById(orderId)
           .orElseThrow(() -> new NotFoundHttpException("Order not found"));
-    } catch (NotFoundHttpException e) {
-      throw e; // rethrow the exception if it occurs
     } catch (Exception e) {
       throw new InternalServerHttpException("Failed to retrieve order: " + e.getMessage());
     }
   }
 
+  @Override
+  public List<Order> getOrdersByUserId(Long userId) {
+    try {
+      return orderRepository.findByUserId(userId);
+    } catch (DataAccessException e) {
+      throw new InternalServerHttpException("Failed to retrieve orders for user: " + e.getMessage());
+    } catch (Exception e) {
+      throw new InternalServerHttpException("An unexpected error occurred: " + e.getMessage());
+    }
+  }
 }
