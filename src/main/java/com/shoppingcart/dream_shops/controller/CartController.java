@@ -47,9 +47,12 @@ public class CartController {
     return ResponseEntity.ok(new ApiResponse("Total Price", totalPrice));
   }
 
-  @PostMapping("/{cartId}/cart/items/{productId}/add")
-  public ResponseEntity<ApiResponse> addItemToCart(@PathVariable Long cartId, @PathVariable Long productId,
+  @PostMapping("/cart/items/add")
+  public ResponseEntity<ApiResponse> addItemToCart(@RequestParam Long cartId, @RequestParam Long productId,
       @RequestParam int quantity) {
+    if (cartId == null) {
+      cartId = cartService.initializeNewCart();
+    }
     cartItemService.addItemToCart(cartId, productId, quantity);
     return ResponseEntity.ok(new ApiResponse("Product added to cart", true));
   }

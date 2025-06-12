@@ -1,13 +1,13 @@
 package com.shoppingcart.dream_shops.service.cart;
 
 import java.math.BigDecimal;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.stereotype.Service;
 
 import com.shoppingcart.dream_shops.http_exception.InternalServerHttpException;
 import com.shoppingcart.dream_shops.http_exception.NotFoundHttpException;
 import com.shoppingcart.dream_shops.model.Cart;
-import com.shoppingcart.dream_shops.model.CartItem;
 import com.shoppingcart.dream_shops.repository.CartItemRepository;
 import com.shoppingcart.dream_shops.repository.CartRepository;
 
@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 public class CartService implements ICartService {
   private final CartRepository cartRepository;
   private final CartItemRepository cartItemRepository;
+  private final AtomicLong cartIdGenerator = new AtomicLong(0);
 
   @Override
   public Cart getCartById(Long cartId) {
@@ -48,6 +49,15 @@ public class CartService implements ICartService {
   public BigDecimal getTotalPrice(Long cartId) {
     Cart cart = getCartById(cartId);
     return cart.getTotalAmount();
+  }
+
+  @Override
+  public Long initializeNewCart() {
+    Cart newCart = new Cart();
+    Long newCartId = cartIdGenerator.incrementAndGet();
+    newCart.setId(newCartId);
+    newCart.setTotalAmount(BigDecimal.ZERO);
+    return cartRepository.save(newCart).getId();
   }
 
 }
