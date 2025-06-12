@@ -89,7 +89,8 @@ public class CarItemService implements ICarItemService {
     // not recalculated), this sets it to BigDecimal.ZERO to avoid
     // NullPointerException in later processing or API responses.
     // It ensures your API always returns a valid number for the cart total.
-    BigDecimal totalAmount = cart.getTotalAmount();
+    BigDecimal totalAmount = cart.getCartItems().stream().map(carItem -> carItem.getTotalPrice())
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
     cart.setTotalAmount(totalAmount != null ? totalAmount : BigDecimal.ZERO);
 
     try {

@@ -2,6 +2,8 @@ package com.shoppingcart.dream_shops.model;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,6 +34,7 @@ public class CartItem {
   private BigDecimal unitPrice;
   private BigDecimal totalPrice; // Total price for this item (quantity * unit price)
 
+  @JsonIgnore
   @ManyToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "cart_id", nullable = false)
   private Cart cart; // Reference to the cart this item belongs to*

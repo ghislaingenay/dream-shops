@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.shoppingcart.dream_shops.http_exception.InternalServerHttpException;
 import com.shoppingcart.dream_shops.http_exception.NotFoundHttpException;
@@ -35,6 +36,8 @@ public class CartService implements ICartService {
     }
   }
 
+  @Transactional // if one fail, everything fails
+  // and rollback
   @Override
   public void clearCart(Long cartId) {
     Cart cart = getCartById(cartId);
