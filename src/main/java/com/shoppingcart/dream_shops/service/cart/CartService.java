@@ -1,6 +1,7 @@
 package com.shoppingcart.dream_shops.service.cart;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.stereotype.Service;
@@ -61,6 +62,19 @@ public class CartService implements ICartService {
     newCart.setId(newCartId);
     newCart.setTotalAmount(BigDecimal.ZERO);
     return cartRepository.save(newCart).getId();
+  }
+
+  @Override
+  public Cart getCartByUserId(Long userId) {
+    try {
+      return Optional.ofNullable(cartRepository.findByUserId(userId))
+          .orElseThrow(() -> new NotFoundHttpException("Cart not found for user"));
+    } catch (NotFoundHttpException e) {
+      throw e; // Rethrow the NotFoundHttpException if it occurs
+    } catch (Exception e) {
+      throw new InternalServerHttpException(e.getMessage());
+      // Handle exception, log error, etc.
+    }
   }
 
 }
