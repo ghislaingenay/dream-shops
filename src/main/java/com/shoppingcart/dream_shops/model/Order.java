@@ -13,6 +13,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -37,5 +39,9 @@ public class Order {
   @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true) // Maps the relationship to the
                                                                                   // OrderItem entity
   private Set<OrderItem> orderItems; // Set of items in the order
+
+  @ManyToOne
+  @JoinColumn(name = "user_id", nullable = false) // Foreign key to the User entity
+  private User user; // Reference to the user who placed the order
 
 }
