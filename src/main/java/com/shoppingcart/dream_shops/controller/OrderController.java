@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.shoppingcart.dream_shops.dto.OrderDto;
 import com.shoppingcart.dream_shops.model.Order;
 import com.shoppingcart.dream_shops.response.ApiResponse;
 import com.shoppingcart.dream_shops.service.order.IOrderService;
@@ -31,19 +32,24 @@ public class OrderController {
    */
   public ResponseEntity<ApiResponse> createOrder(@RequestParam Long userId) {
     Order order = orderService.placeOrder(userId);
-    return ResponseEntity.ok(new ApiResponse("Order retrieved ", order));
+    OrderDto orderDto = orderService.convertToDto(order);
+    return ResponseEntity.ok(new ApiResponse("Order retrieved ", orderDto));
   }
 
   @GetMapping("/{orderId}")
   public ResponseEntity<ApiResponse> getOrderById(@PathVariable Long orderId) {
     Order order = orderService.getOrder(orderId);
-    return ResponseEntity.ok(new ApiResponse("Order retrieved ", order));
+    OrderDto orderDto = orderService.convertToDto(order);
+    return ResponseEntity.ok(new ApiResponse("Order retrieved ", orderDto));
   }
 
   @GetMapping("/user")
   public ResponseEntity<ApiResponse> getOrdersByUserId(Long userId) {
     List<Order> order = orderService.getOrdersByUserId(userId);
-    return ResponseEntity.ok(new ApiResponse("Order retrieved ", order));
+    List<OrderDto> orderDtos = order.stream()
+        .map(orderService::convertToDto)
+        .toList();
+    return ResponseEntity.ok(new ApiResponse("Order retrieved ", orderDtos));
   }
 
 }

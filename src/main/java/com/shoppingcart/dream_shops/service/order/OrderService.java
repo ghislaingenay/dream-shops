@@ -31,7 +31,7 @@ public class OrderService implements IOrderService {
   private final ModelMapper modelMapper;
 
   @Override
-  public OrderDto placeOrder(Long userId) {
+  public Order placeOrder(Long userId) {
     Cart cart = cartService.getCartByUserId(userId);
     Order order = createOrder(cart);
     List<OrderItem> orderItems = createOrderItems(order, cart);
@@ -45,7 +45,7 @@ public class OrderService implements IOrderService {
       throw new InternalServerHttpException("Failed to place order: " + e.getMessage());
     }
 
-    return convertToDto(savedOrder);
+    return savedOrder;
   }
 
   private Order createOrder(Cart cart) {
@@ -79,9 +79,9 @@ public class OrderService implements IOrderService {
   }
 
   @Override
-  public OrderDto getOrder(Long orderId) {
+  public Order getOrder(Long orderId) {
     try {
-      return orderRepository.findById(orderId).map(this::convertToDto)
+      return orderRepository.findById(orderId)
           .orElseThrow(() -> new NotFoundHttpException("Order not found"));
     } catch (Exception e) {
       throw new InternalServerHttpException("Failed to retrieve order: " + e.getMessage());
@@ -89,10 +89,9 @@ public class OrderService implements IOrderService {
   }
 
   @Override
-  public List<OrderDto> getOrdersByUserId(Long userId) {
+  public List<Order> getOrdersByUserId(Long userId) {
     try {
-      List<Order> orders = orderRepository.findByUserId(userId);
-      return convertToDtoList(orders);
+      return orderRepository.findByUserId(userId);
     } catch (DataAccessException e) {
       throw new InternalServerHttpException("Failed to retrieve orders for user: " + e.getMessage());
     } catch (Exception e) {
@@ -100,16 +99,9 @@ public class OrderService implements IOrderService {
     }
   }
 
-  private OrderDto convertToDto(Order order) {
+  @Override
+  public OrderDto convertToDto(Order order) {
     return modelMapper.map(order, OrderDto.class);
   }
 
-  private List<OrderDto> convertToDtoList(List<Order> orders) {
-    if (orders == null || orders.isEmpty()) {
-      return List.of();
-    }
-    return orders.stream()
-        .map(this::convertToDto)
-        .toList();
-  }
 }
