@@ -2,9 +2,11 @@ package com.shoppingcart.dream_shops.service.user;
 
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
+import com.shoppingcart.dream_shops.dto.UserDto;
 import com.shoppingcart.dream_shops.http_exception.InternalServerHttpException;
 import com.shoppingcart.dream_shops.http_exception.NotFoundHttpException;
 import com.shoppingcart.dream_shops.http_exception.UnAuthorizedHttpException;
@@ -19,11 +21,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserService implements IUserService {
   private final UserRepository userRepository;
+  private final ModelMapper modelMapper;
 
   @Override
   public User getUserById(Long userId) {
     try {
-      return userRepository.findById(userId).orElseThrow(() -> new NotFoundHttpException("User not found"));
+      return userRepository.findById(userId)
+          .orElseThrow(() -> new NotFoundHttpException("User not found"));
     } catch (DataAccessException e) {
       throw new InternalServerHttpException(
           "Failed to retrieve user with ID: " + userId + ". Error: " + e.getMessage());
@@ -91,6 +95,11 @@ public class UserService implements IUserService {
         () -> {
           throw new NotFoundHttpException("User not found");
         });
+  }
+
+  @Override
+  public UserDto convertToDto(User user) {
+    return modelMapper.map(user, UserDto.class);
   }
 
 }
