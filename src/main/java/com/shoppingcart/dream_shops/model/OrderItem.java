@@ -2,6 +2,8 @@ package com.shoppingcart.dream_shops.model;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,6 +26,7 @@ public class OrderItem {
   @GeneratedValue(strategy = GenerationType.IDENTITY) // Automatically generates a unique identifier for each category
   private long id;
 
+  @JsonIgnore
   @ManyToOne
   @JoinColumn(name = "order_id", nullable = false)
   private Order order; // Reference to the order this item belongs to
