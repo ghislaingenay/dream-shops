@@ -2,12 +2,12 @@ package com.shoppingcart.dream_shops.service.order;
 
 import java.util.List;
 
-import com.shoppingcart.dream_shops.model.Order;
+import com.shoppingcart.dream_shops.dto.OrderDto;
 
 public interface IOrderService {
-  Order placeOrder(Long userId);
+  OrderDto placeOrder(Long userId);
 
-  Order getOrder(Long orderId);
+  OrderDto getOrder(Long orderId);
 
-  List<Order> getOrdersByUserId(Long userId);
+  List<OrderDto> getOrdersByUserId(Long userId);
 }

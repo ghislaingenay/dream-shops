@@ -2,11 +2,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
+import com.shoppingcart.dream_shops.dto.OrderDto;
 import com.shoppingcart.dream_shops.enums.OrderStatus;
 import com.shoppingcart.dream_shops.http_exception.InternalServerHttpException;
 import com.shoppingcart.dream_shops.http_exception.NotFoundHttpException;
@@ -16,11 +17,10 @@ import com.shoppingcart.dream_shops.model.OrderItem;
 import com.shoppingcart.dream_shops.model.Product;
 import com.shoppingcart.dream_shops.repository.OrderRepository;
 import com.shoppingcart.dream_shops.repository.ProductRepository;
-
-import lombok.RequiredArgsConstructor;
-
 import com.shoppingcart.dream_shops.service.cart.CartService;
 import com.shoppingcart.dream_shops.service.order.IOrderService;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -28,9 +28,10 @@ public class OrderService implements IOrderService {
   private final OrderRepository orderRepository;
   private final ProductRepository productRepository;
   private final CartService cartService; // Assuming you have a CartService to manage carts
+  private final ModelMapper modelMapper;
 
   @Override
-  public Order placeOrder(Long userId) {
+  public OrderDto placeOrder(Long userId) {
     Cart cart = cartService.getCartByUserId(userId);
     Order order = createOrder(cart);
     List<OrderItem> orderItems = createOrderItems(order, cart);
@@ -44,7 +45,7 @@ public class OrderService implements IOrderService {
       throw new InternalServerHttpException("Failed to place order: " + e.getMessage());
     }
 
-    return savedOrder;
+    return convertToDto(savedOrder);
   }
 
   private Order createOrder(Cart cart) {
@@ -78,9 +79,9 @@ public class OrderService implements IOrderService {
   }
 
   @Override
-  public Order getOrder(Long orderId) {
+  public OrderDto getOrder(Long orderId) {
     try {
-      return orderRepository.findById(orderId)
+      return orderRepository.findById(orderId).map(this::convertToDto)
           .orElseThrow(() -> new NotFoundHttpException("Order not found"));
     } catch (Exception e) {
       throw new InternalServerHttpException("Failed to retrieve order: " + e.getMessage());
@@ -88,13 +89,27 @@ public class OrderService implements IOrderService {
   }
 
   @Override
-  public List<Order> getOrdersByUserId(Long userId) {
+  public List<OrderDto> getOrdersByUserId(Long userId) {
     try {
-      return orderRepository.findByUserId(userId);
+      List<Order> orders = orderRepository.findByUserId(userId);
+      return convertToDtoList(orders);
     } catch (DataAccessException e) {
       throw new InternalServerHttpException("Failed to retrieve orders for user: " + e.getMessage());
     } catch (Exception e) {
       throw new InternalServerHttpException("An unexpected error occurred: " + e.getMessage());
     }
+  }
+
+  private OrderDto convertToDto(Order order) {
+    return modelMapper.map(order, OrderDto.class);
+  }
+
+  private List<OrderDto> convertToDtoList(List<Order> orders) {
+    if (orders == null || orders.isEmpty()) {
+      return List.of();
+    }
+    return orders.stream()
+        .map(this::convertToDto)
+        .toList();
   }
 }
