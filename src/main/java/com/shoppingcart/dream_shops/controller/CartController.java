@@ -12,7 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.shoppingcart.dream_shops.http_exception.UnAuthorizedHttpException;
 import com.shoppingcart.dream_shops.model.Cart;
+import com.shoppingcart.dream_shops.model.User;
+import com.shoppingcart.dream_shops.repository.UserRepository;
 import com.shoppingcart.dream_shops.response.ApiResponse;
 import com.shoppingcart.dream_shops.service.car_item.ICarItemService;
 import com.shoppingcart.dream_shops.service.cart.ICartService;
@@ -25,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class CartController {
   private final ICartService cartService;
   private final ICarItemService cartItemService;
+  private final UserRepository userRepository;
 
   @GetMapping("/{cartId}")
   public ResponseEntity<ApiResponse> getCart(@PathVariable Long cartId) {
@@ -51,10 +55,11 @@ public class CartController {
   public ResponseEntity<ApiResponse> addItemToCart(@RequestParam(required = false) Long cartId,
       @RequestParam Long productId,
       @RequestParam int quantity) {
-    if (cartId == null) {
-      cartId = cartService.initializeNewCart();
-    }
-    cartItemService.addItemToCart(cartId, productId, quantity);
+
+    User user = userRepository.findById(1L).orElseThrow(() -> new UnAuthorizedHttpException());
+    Cart cart = cartService.initializeNewCart(user);
+
+    cartItemService.addItemToCart(cart.getId(), productId, quantity);
     return ResponseEntity.ok(new ApiResponse("Product added to cart", true));
   }
 
