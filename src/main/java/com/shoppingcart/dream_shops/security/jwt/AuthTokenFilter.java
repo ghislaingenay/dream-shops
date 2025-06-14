@@ -16,18 +16,15 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 // AuthTokenFilter: Checks for JWT in requests and sets authentication if valid
 public class AuthTokenFilter extends OncePerRequestFilter {
   // JWT utility for parsing and validation
   private final JwtUtils jwtUtils;
   // Loads user details by username/email
   private final ShopUserDetailsService userDetailsService;
-
-  public AuthTokenFilter(JwtUtils jwtUtils, ShopUserDetailsService userDetailsService) {
-    this.jwtUtils = jwtUtils;
-    this.userDetailsService = userDetailsService;
-  }
 
   @Override
   protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
