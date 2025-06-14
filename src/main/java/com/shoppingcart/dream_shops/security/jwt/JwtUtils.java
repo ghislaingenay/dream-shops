@@ -7,12 +7,15 @@ import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Component;
 
 import com.shoppingcart.dream_shops.security.user.ShopUserDetails;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -21,8 +24,11 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 
+@Component
 public class JwtUtils {
+  @Value("${auth.token.jwtSecret}")
   private String jwtSecret;
+  @Value("${auth.token.expirationTime}")
   private int expirationTime;
 
   private Key key() {
@@ -56,7 +62,7 @@ public class JwtUtils {
       return true;
     } catch (ExpiredJwtException | UnsupportedJwtException | SignatureException | MalformedJwtException
         | IllegalArgumentException e) {
-      return false;
+      throw new JwtException(e.getMessage());
     }
   }
 }
