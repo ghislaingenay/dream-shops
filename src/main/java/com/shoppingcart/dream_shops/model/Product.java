@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,6 +22,7 @@ import lombok.Setter;
 // Use @AllArgsConstructor only if you really need a constructor with all fields
 // (which is rare for JPA entities).
 @Entity
+@Table(name = "products")
 public class Product {
   @Id
   @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY) // Automatically generates a unique identifier
