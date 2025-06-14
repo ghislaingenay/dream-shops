@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.shoppingcart.dream_shops.dto.ImageDto;
 import com.shoppingcart.dream_shops.dto.ProductDto;
+import com.shoppingcart.dream_shops.http_exception.AlreadyExistsHttpException;
 import com.shoppingcart.dream_shops.http_exception.InternalServerHttpException;
 import com.shoppingcart.dream_shops.http_exception.NotFoundHttpException;
 import com.shoppingcart.dream_shops.model.Category;
@@ -39,6 +40,10 @@ public class ProductService implements IProductService {
     // check if the category exists
     // If yes, set it as the new product category
     // If not, save it as category and as new product category
+    if (productExists(request.name(), request.brand())) {
+      throw new AlreadyExistsHttpException("Product with name '" + request.name() + "' and brand '" + request.brand()
+          + "' already exists.");
+    }
     Category category = Optional.ofNullable(categoryRepository.findByName(request.category().getName()))
         .orElseGet(() -> {
           Category newCategory = new Category(request.category().getName());
@@ -50,6 +55,10 @@ public class ProductService implements IProductService {
     } catch (Exception e) {
       throw new InternalServerHttpException("Failed to add product: " + e.getMessage());
     }
+  }
+
+  private boolean productExists(String name, String brand) {
+    return productRepository.existsByNameAndBrand(name, brand);
   }
 
   /** Hypermethod to help create a product to addProduct */
