@@ -20,13 +20,6 @@ public class DataInitializer implements ApplicationListener<ApplicationReadyEven
   private final ProductRepository productRepository;
   private final UserRepository userRepository;
 
-  public DataInitializer(CategoryRepository categoryRepository, ProductRepository productRepository,
-      UserRepository userRepository) {
-    this.categoryRepository = categoryRepository;
-    this.productRepository = productRepository;
-    this.userRepository = userRepository;
-  }
-
   // private void createUserIfNotExists(String username, String password) {
   // if (!userRepository.findBy('email', username)) {
   // User user = new User();
