@@ -17,12 +17,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 
-// AuthTokenFilter is a custom filter that checks for a JWT in the Authorization header of each HTTP request.
-// If a valid JWT is found, it sets the authentication in the Spring Security context.
+// AuthTokenFilter: Checks for JWT in requests and sets authentication if valid
 public class AuthTokenFilter extends OncePerRequestFilter {
-  // Utility for JWT operations (parsing, validation, extracting username)
+  // JWT utility for parsing and validation
   private final JwtUtils jwtUtils;
-  // Service to load user details from the database or user store
+  // Loads user details by username/email
   private final ShopUserDetailsService userDetailsService;
 
   public AuthTokenFilter(JwtUtils jwtUtils, ShopUserDetailsService userDetailsService) {
@@ -35,30 +34,27 @@ public class AuthTokenFilter extends OncePerRequestFilter {
       @NonNull FilterChain filterChain)
       throws ServletException, IOException {
 
-    // Extract JWT from the Authorization header
+    // Get JWT from Authorization header
     String jwt = parseJwt(request);
-    // If the JWT is present and valid
+    // If JWT is present and valid
     if (StringUtils.hasText(jwt) && jwtUtils.validateToken(jwt)) {
-      // Extract the username/email from the JWT
+      // Extract username/email from JWT
       String email = jwtUtils.getUsernameFromToken(jwt);
-      // Load user details using the extracted email
+      // Load user details
       ShopUserDetails userDetails = userDetailsService.loadUserByUsername(email);
-      // Create an authentication object with the user details and authorities
+      // Set authentication in security context
       Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-      // Set the authentication in the Spring Security context
       SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
-    // Continue the filter chain (important to allow the request to proceed)
+    // Continue with the next filter or controller
     filterChain.doFilter(request, response);
   }
 
-  // Helper method to extract the JWT from the Authorization header
+  // Extract JWT from Authorization header if present
   private String parseJwt(HttpServletRequest request) {
     String headerAuth = request.getHeader("Authorization");
-    // Check if the header is present and starts with "Bearer "
     if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-      // Return the JWT part after "Bearer "
       return headerAuth.substring(7);
     }
     return null;
